@@ -194,7 +194,7 @@ const bestEl = document.getElementById("best");
 const paceEl = document.getElementById("pace");
 const soundBtn = document.getElementById("sound");
 
-let snake, dir, queue, food, score, best, running, paused, over, won, acc, last;
+let snake, dir, queue, food, score, best, running, paused, over, won, countdown, acc, last;
 let soundOn = false;
 let audioCtx = null;
 
@@ -202,7 +202,7 @@ try { best = Number(localStorage.getItem(BEST_KEY) || 0); } catch (err) { best =
 bestEl.textContent = String(best);
 
 function reset() {
-  snake = [{ x: 8, y: 10 }, { x: 7, y: 10 }, { x: 6, y: 10 }];
+  snake = [{ x: 4, y: 10 }, { x: 3, y: 10 }, { x: 2, y: 10 }];
   dir = { x: 1, y: 0 };
   queue = [];
   score = 0;
@@ -210,11 +210,12 @@ function reset() {
   paused = false;
   over = false;
   won = false;
+  countdown = 0;
   acc = 0;
   last = 0;
   food = placeFood();
   paintHud();
-  showOverlay("Listo", "Flechas o WASD para moverte. Espacio pausa la partida.", "Jugar");
+  showOverlay("Listo", "Al empezar hay 3 segundos para colocarte. Flechas o WASD. Espacio pausa.", "Jugar");
 }
 
 function placeFood() {
@@ -229,7 +230,7 @@ function placeFood() {
 }
 
 function tickMs() {
-  return Math.max(55, 160 - (score / 10) * 7);
+  return Math.max(60, 200 - (score / 10) * 8);
 }
 
 function paceLevel() {
@@ -265,6 +266,7 @@ function begin() {
   if (over || won) reset();
   running = true;
   paused = false;
+  countdown = 3;
   hideOverlay();
   last = 0;
   acc = 0;
@@ -316,10 +318,18 @@ function frame(time) {
   if (running && !paused) {
     if (!last) last = time;
     acc += time - last;
-    const stepMs = tickMs();
-    while (acc >= stepMs && running && !paused) {
-      step();
-      acc -= stepMs;
+    if (countdown > 0) {
+      while (acc >= 1000 && countdown > 0) {
+        countdown -= 1;
+        acc -= 1000;
+        if (countdown === 0) acc = 0;
+      }
+    } else {
+      const stepMs = tickMs();
+      while (acc >= stepMs && running && !paused) {
+        step();
+        acc -= stepMs;
+      }
     }
   }
   last = time;
@@ -347,6 +357,15 @@ function draw() {
   }
   if (food) drawBerry(food.x, food.y, cell);
   snake.forEach((part, index) => drawSegment(part, index, cell));
+  if (running && !paused && countdown > 0) {
+    ctx.fillStyle = "rgba(20, 17, 14, 0.35)";
+    ctx.fillRect(0, 0, width, height);
+    ctx.fillStyle = "#f3ead7";
+    ctx.font = `700 ${Math.floor(cell * 4)}px Georgia, serif`;
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillText(String(countdown), width / 2, height / 2);
+  }
 }
 
 function roundRect(x, y, w, h, r) {
