@@ -78,7 +78,7 @@
   #sound[aria-pressed="true"] { background: var(--snake); color: var(--ink); border-color: transparent; }
   .stage {
     position: relative;
-    width: min(100%, 560px);
+    width: min(100%, 560px, calc(100dvh - 300px));
     margin: 0 auto;
     aspect-ratio: 1;
     border-radius: 18px;
@@ -139,6 +139,13 @@
   #left { grid-area: left; }
   #down { grid-area: down; }
   #right { grid-area: right; }
+  @media (max-width: 799px) {
+    .app { padding: 12px 12px 18px; }
+    h1 { font-size: 32px; }
+    .hud { margin: 10px 0 8px; }
+    .stat strong { font-size: 22px; }
+    .help { font-size: 12px; }
+  }
   @media (min-width: 800px) {
     .pad { display: none; }
   }
